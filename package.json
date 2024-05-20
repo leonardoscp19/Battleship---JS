@@ -1,0 +1,16 @@
+{
+    "name": "Battleship",
+    "version": "1.0.0",
+    "description": "A simple Battleship game",
+    "private": true,
+    "scripts": {
+        "app": "index.html",
+        "test": "test.html",
+        "docs": "jsdoc -d docs --configure jsdocConf.json && docs\\index.html"
+    },
+    "author": "CJL",
+    "license": "MIT",
+    "devDependencies": {
+        "docdash": "^2.0.2"
+    }
+}

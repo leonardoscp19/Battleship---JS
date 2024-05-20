@@ -1,0 +1,31 @@
+{
+    "plugins": ["plugins/markdown"],
+    "recurseDepth": 10,
+    "opts": {
+        "template": "node_modules/docdash",
+        "destination": "./docs",
+        "recurse": true
+    },
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc", "closure"]
+    },
+    "source": {
+        "include": ["./", "README.md"],
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "node_modules"
+    },
+    "sourceType": "module",
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false,
+        "default": {
+            "outputSourceFiles": true
+        }
+    },
+    "docdash": {
+        "sort": true,
+        "search": true,
+        "collapse": false
+    }
+}

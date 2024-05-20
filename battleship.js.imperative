@@ -1,0 +1,337 @@
+// Game constants
+const MAX_ROWS = 10;
+const MAX_COLS = 10;
+const CELL_SIZE_PX = 50;
+const MISS_COLOR = '#bbb';
+const HIT_COLOR = 'red';
+
+// Cell possible states
+const CELL_EMPTY = 0
+const CELL_MARGIN = 2
+const CELL_SHIP_PART_FLOAT = 1
+const CELL_SHIP_PART_HIT = 3
+const CELL_MISSED_SHOT = 5
+
+
+/**
+ *  There are 25 hits to be made in order to win the game:
+ *     Carrier (t-shape)    - 5 hits
+ *     4 cannon ship (1x4)  - 4 hits
+ *     3 cannon ship (2x3)  - 6 hits
+ *     2 cannon ships (3x2) - 6 hits
+ *     4 Submarines (4x1)   - 4 hits
+ *
+ * The game board.
+ * In each position:
+ *   - the highest nibble holds the boat's number of cannons.
+ *   - the lowest nibble holds one of:
+ *           0 = empty, 2 - margin around ships 1 = part of a ship, 3 = a sunken part of a ship, 5 = a missed shot
+ *
+ */
+var gameBoard = [
+	[0x21, 0x00, 0x00, 0x41, 0x41, 0x41, 0x41, 0x00, 0x00, 0x00],
+	[0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+	[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00],
+	[0x51, 0x00, 0x00, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00, 0x00],
+	[0x51, 0x51, 0x51, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00, 0x00],
+	[0x51, 0x00, 0x00, 0x00, 0x00, 0x31, 0x00, 0x31, 0x31, 0x31],
+	[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+	[0x00, 0x00, 0x00, 0x21, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00],
+	[0x11, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x21, 0x21, 0x00],
+	[0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00]
+];
+var hitCount = 0;
+var shotCount = 0;
+
+/**
+ * Draw the game board.
+ * Row 0 and col 0 are used to show the coordinate system only. They don't have position indexes!
+ */
+function DrawBoard() {
+	for (row = 0; row <= MAX_ROWS; row++) {
+		for (col = 0; col <= MAX_COLS; col++) {
+
+			// create a div HTML element for each grid cell.
+			var cell = document.createElement("div");
+			gameBoardContainer.appendChild(cell);
+
+			if (row != 0 && col != 0) {
+				// Each cell is a div element with an ID with format: "s<row><col>"
+				cell.id = 'c' + (row-1) + (col-1);
+			}
+			else {
+				if (row == 0 && col != 0) {
+					cell.textContent = String.fromCharCode("A".charCodeAt(0) + col-1);
+				}
+				if (col == 0 && row != 0) {
+					cell.textContent = row;
+				}
+			}
+
+			// The cells are absolute positioned in the board (see style.css)
+			cell.style.top = row * CELL_SIZE_PX + 'px';
+			cell.style.left = col * CELL_SIZE_PX + 'px';
+
+			// Hit cells belonging to a ship will show the type of ship. This is to center the text vertically and horizontally.
+			cell.style.textAlign = "center";
+			cell.style.paddingTop = Math.floor(CELL_SIZE_PX / 3) + "px";
+		}
+	}
+}
+
+/**
+ * Handle hits on the game board.
+ * @param {*} e Event.
+ * @returns Nothing.
+ */
+function fire(e) {
+    // if item clicked (e.target) is not the parent element on which the event listener was set (e.currentTarget).
+	if (e.target !== e.currentTarget) {
+        // Get row and column indexes from the id of the HTML element.
+		var row = e.target.id.substring(1, 2);
+		var col = e.target.id.substring(2, 3);
+        //alert("Click on row " + row + ", col " + col);
+
+		if (row && col) {
+
+			shotCount++;
+
+			if (gameBoard[row][col] == CELL_EMPTY || gameBoard[row][col] == CELL_MARGIN) {
+				// A shot on the water changes the color to gray and the cell's value to 3 (miss)
+				e.target.style.background = MISS_COLOR;
+				gameBoard[row][col] = (gameBoard[row][col] & 0xF0) | CELL_MISSED_SHOT;
+			}
+			else if ((gameBoard[row][col] & 0x0F) == CELL_SHIP_PART_FLOAT) {
+				// A hit on a ship changes the color to red and cell's value to 2 (hit)
+				e.target.style.background = HIT_COLOR;
+				gameBoard[row][col] = (gameBoard[row][col] & 0xF0) | CELL_SHIP_PART_HIT;
+
+				// Show what type of ship was hit.
+				e.target.textContent = (gameBoard[row][col] & 0xF0) >> 4;
+
+				// Increment hitCount
+				hitCount++;
+				if (hitCount == winCount) { // This must be calculated!
+					setTimeout(function() { alert("Todos os navios foram afundados! Parabéns, ganhaste!\n\nPrecisaste de " + shotCount + " torpedos."); }, 100);
+				}
+			}
+			else if ((gameBoard[row][col] & 0x0F) > CELL_MARGIN) {
+				// A shot on a cell that's been previously hit!
+				alert("Para de desperdiçar torpedos! Já disparaste nesta posição.");
+			}
+		}
+    }
+    e.stopPropagation();
+}
+
+/**
+ * Get a random int in the interval [min, max[
+ *
+ * @param min The minimum value (inclusive)
+ * @param max The maximum value (exclusive)
+ * @returns A random integer value.
+ */
+function getRandomInt(min, max) {
+	const minCeiled = Math.ceil(min);
+	const maxFloored = Math.floor(max);
+	return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+  }
+
+  /**
+   * Clear the gaming board.
+   */
+function clearBoard() {
+	// Clear board
+	var i, j;
+	for (i = 0; i < MAX_COLS; i++) {
+		for (j = 0; j < MAX_ROWS; j++) {
+			gameBoard[i][j] = CELL_EMPTY;
+		}
+	}
+}
+
+/**
+ * Place all the ships on the gaming board.
+ */
+function initBoard() {
+
+	clearBoard();
+
+	// Place carrier
+	placeCarrier();
+
+	// Place 1 x 4 cannon ships
+	placeLinearShip(4);
+
+	// Place 2 x 3 cannon ships
+	placeLinearShip(3);
+	placeLinearShip(3);
+
+    // Place 3 x 2 cannon ships
+	placeLinearShip(2);
+	placeLinearShip(2);
+	placeLinearShip(2);
+
+	// Place 4 x 1 cannon ships
+	placeLinearShip(1);
+	placeLinearShip(1);
+	placeLinearShip(1);
+	placeLinearShip(1);
+
+	// Return number of hits to win (number of cells containing boats)
+	return gameBoard.reduce((currentCount, row) => currentCount + row.filter(x => (x & 0x0F) === CELL_SHIP_PART_FLOAT).length, 0);
+}
+
+/**
+ * Fills a rectangle that defines a non overlapping zone around the ship.
+ *
+ * @param firstRow
+ * @param firstCol
+ * @param width
+ * @param height
+ */
+function setShipNonOverlappingArea(firstRow, firstCol, width, height) {
+	var i, j;
+	var topLeftRow = firstRow - 1;
+	var topLeftCol = firstCol - 1;
+	var bottomRightRow = firstRow + height;
+	var bottomRightCol = firstCol + width;
+
+	for (i = topLeftRow; i <= bottomRightRow; i++) {
+		for (j = topLeftCol; j <= bottomRightCol; j++) {
+			if (i >= 0 && i < MAX_ROWS && j >= 0 && j < MAX_COLS) {
+				gameBoard[i][j] = CELL_MARGIN;
+			}
+		}
+	}
+}
+
+/**
+ * Randomly places an aircraft carrier in the game board.
+ */
+function placeCarrier() {
+
+	switch (getRandomInt(0, 4)) { // Random is "orientation"
+		case 0: 	// T
+			firstRow = getRandomInt(0, MAX_ROWS-2);
+			firstCol = getRandomInt(0, MAX_COLS-2);
+
+			setShipNonOverlappingArea(firstRow, firstCol, 3, 3);
+
+			gameBoard[firstRow][firstCol] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow][firstCol+1] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow][firstCol+2] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow+1][firstCol+1] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow+2][firstCol+1] = 0x50 | CELL_SHIP_PART_FLOAT;
+			break;
+
+		case 1:		// ┤
+			firstRow = getRandomInt(0, MAX_ROWS-2);
+			firstCol = getRandomInt(2, MAX_COLS);
+
+			setShipNonOverlappingArea(firstRow, firstCol - 2, 3, 3);
+
+			gameBoard[firstRow][firstCol] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow+1][firstCol] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow+2][firstCol] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow+1][firstCol-1] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow+1][firstCol-2] = 0x50 | CELL_SHIP_PART_FLOAT;
+			break;
+
+		case 2:		// ⟂
+			firstRow = getRandomInt(2, MAX_ROWS);
+			firstCol = getRandomInt(2, MAX_COLS);
+
+			setShipNonOverlappingArea(firstRow - 2, firstCol - 2, 3, 3);
+
+			gameBoard[firstRow][firstCol] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow][firstCol-1] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow][firstCol-2] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow-1][firstCol-1] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow-2][firstCol-1] = 0x50 | CELL_SHIP_PART_FLOAT;
+			break;
+
+		case 3:		// ├
+			firstRow = getRandomInt(2, MAX_ROWS);
+			firstCol = getRandomInt(0, MAX_COLS-2);
+
+			setShipNonOverlappingArea(firstRow - 2, firstCol, 3, 3);
+
+			gameBoard[firstRow][firstCol] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow-1][firstCol] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow-2][firstCol] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow-1][firstCol+1] = 0x50 | CELL_SHIP_PART_FLOAT;
+			gameBoard[firstRow-1][firstCol+2] = 0x50 | CELL_SHIP_PART_FLOAT;
+			break;
+		}
+}
+
+/**
+ * Randomly places a "linear" ship in the game board.
+ *
+ * @param size - Number of cells of the ship.
+ */
+function placeLinearShip(size) {
+	var fits = false;
+
+	do {
+		switch (getRandomInt(0, 2)) { // "orientation"
+			case 0: 	// W-E
+				firstRow = getRandomInt(0, MAX_ROWS);
+				firstCol = getRandomInt(0, MAX_COLS - size + 1);
+
+				fits = true;
+				for (i = 0; i < size; i++) {
+					if (gameBoard[firstRow][firstCol + i] != CELL_EMPTY) {
+						fits = false;
+						break;
+					}
+				}
+				if (fits) {
+					// Set containing rectangle
+					setShipNonOverlappingArea(firstRow, firstCol, size, 1);
+
+					// Insert ship
+					for (i = 0; i < size; i++) {
+						gameBoard[firstRow][firstCol + i] = (size << 4) | CELL_SHIP_PART_FLOAT;
+					}
+
+				}
+				break;
+
+			case 1:		// N-S
+				firstRow = getRandomInt(0, MAX_ROWS - size + 1);
+				firstCol = getRandomInt(0, MAX_COLS);
+
+				fits = true;
+				for (i = 0; i < size; i++) {
+					if (gameBoard[firstRow + i][firstCol] != CELL_EMPTY) {
+						fits = false;
+						break;
+					}
+				}
+				if (fits) {
+					// Set margin
+					setShipNonOverlappingArea(firstRow, firstCol, 1, size);
+
+					// Insert ship
+					for (i = 0; i < size; i++) {
+						gameBoard[firstRow + i][firstCol] = (size << 4) | CELL_SHIP_PART_FLOAT;
+					}
+				}
+				break;
+		}
+	} while (!fits);
+}
+
+
+// Get the board container element in the page.
+var gameBoardContainer = document.getElementById("gameboard");
+
+DrawBoard();
+
+// Initialize the board.
+var winCount = initBoard();
+
+// Define an event listener tio handle shots on the game board cells..
+gameBoardContainer.addEventListener("click", fire, false);
