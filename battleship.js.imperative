@@ -4,6 +4,7 @@ const MAX_COLS = 10;
 const CELL_SIZE_PX = 50;
 const MISS_COLOR = '#bbb';
 const HIT_COLOR = 'red';
+const COORD_COLOR = 'black';
 
 // Cell possible states
 const CELL_EMPTY = 0
@@ -28,18 +29,7 @@ const CELL_MISSED_SHOT = 5
  *           0 = empty, 2 - margin around ships 1 = part of a ship, 3 = a sunken part of a ship, 5 = a missed shot
  *
  */
-var gameBoard = [
-	[0x21, 0x00, 0x00, 0x41, 0x41, 0x41, 0x41, 0x00, 0x00, 0x00],
-	[0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-	[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00],
-	[0x51, 0x00, 0x00, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00, 0x00],
-	[0x51, 0x51, 0x51, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00, 0x00],
-	[0x51, 0x00, 0x00, 0x00, 0x00, 0x31, 0x00, 0x31, 0x31, 0x31],
-	[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-	[0x00, 0x00, 0x00, 0x21, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00],
-	[0x11, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x21, 0x21, 0x00],
-	[0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00]
-];
+var gameBoard = [];
 var hitCount = 0;
 var shotCount = 0;
 
@@ -56,10 +46,12 @@ function DrawBoard() {
 			gameBoardContainer.appendChild(cell);
 
 			if (row != 0 && col != 0) {
-				// Each cell is a div element with an ID with format: "s<row><col>"
+				// Each cell is a div element with an ID with format: "c<row><col>"
 				cell.id = 'c' + (row-1) + (col-1);
 			}
 			else {
+                cell.style.backgroundColor = COORD_COLOR;
+                cell.style.color = "white";
 				if (row == 0 && col != 0) {
 					cell.textContent = String.fromCharCode("A".charCodeAt(0) + col-1);
 				}
@@ -85,7 +77,7 @@ function DrawBoard() {
  * @returns Nothing.
  */
 function fire(e) {
-    // if item clicked (e.target) is not the parent element on which the event listener was set (e.currentTarget).
+    // The listener was set on the board (e.currentTarget), but the clicks are on cells (e.target).
 	if (e.target !== e.currentTarget) {
         // Get row and column indexes from the id of the HTML element.
 		var row = e.target.id.substring(1, 2);
@@ -155,6 +147,7 @@ function clearBoard() {
  */
 function initBoard() {
 
+    this.gameBoard = Array(MAX_ROWS).fill().map(() => Array(MAX_COLS).fill(CELL_EMPTY));
 	clearBoard();
 
 	// Place carrier
@@ -333,5 +326,5 @@ DrawBoard();
 // Initialize the board.
 var winCount = initBoard();
 
-// Define an event listener tio handle shots on the game board cells..
+// Define an event listener to handle shots on the game board cells.
 gameBoardContainer.addEventListener("click", fire, false);

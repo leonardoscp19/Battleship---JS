@@ -432,7 +432,7 @@ class Board {
 				document.getElementById("gameboard").appendChild(cell);
 
 				if (row != 0 && col != 0) {
-					// Each cell is a div element with an ID with format: "s<row><col>"
+					// Each cell is a div element with an ID with format: "c<row><col>"
 					cell.id = 'c' + (row-1) + (col-1);
 				}
 				else {
