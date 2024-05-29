@@ -279,8 +279,8 @@ class Battleship {
 		first_hit = this.#board.update(row, col, (shot_status & 0x0F) == Battleship.SHOT_MISS ? false : true, shot_status >> 4);
 		if (first_hit) {
 			if (this.#hitCount == this.#winCount) {
-				var shotCount = this.#shotCount;
-				setTimeout(function() { alert("Todos os navios foram afundados! Parabéns, ganhaste!\n\nPrecisaste de " + shotCount + " torpedos."); }, 100);
+				let that = this;
+				setTimeout(function() { that.#board.message("Todos os navios foram afundados! Parabéns, ganhaste!\n\nPrecisaste de " + that.#shotCount + " torpedos."); }, 100);
 			}
 		}
 	}
@@ -466,6 +466,7 @@ class Board {
 	 * @return true - first shot; false - repeated shot
 	 */
 	update(row, col, shot_hit, ship_size = 0) {
+		this.message("");
 		if (!shot_hit) {
 			if (this.#gameBoard[row][col] == Board.CELL_EMPTY) {
 				document.getElementById('c'+row.toString() + col.toString()).style.background = Board.MISS_COLOR;
@@ -473,7 +474,7 @@ class Board {
 				return true;
 			}
 			else {
-				alert("Para de desperdiçar torpedos! Já disparaste nesta posição.");
+				this.message("Para de desperdiçar torpedos! Já disparaste nesta posição.");
 				return false;
 			}
 		}
@@ -489,10 +490,20 @@ class Board {
 				return true;
 			}
 			else {
-				alert("Para de desperdiçar torpedos! Já disparaste nesta posição.");
+				this.message("Para de desperdiçar torpedos! Já disparaste nesta posição.");
 				return false;
 			}
 		}
+	}
+
+	/**
+	 * Write message in message area.
+	 * @param {String} msg - The message to write. 
+	 */
+	message(msg) {
+		let msg_el;
+		msg_el = document.getElementById("game-messages");
+		msg_el.textContent = msg;
 	}
 }
 
