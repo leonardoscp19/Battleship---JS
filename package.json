@@ -12,5 +12,8 @@
     "license": "MIT",
     "devDependencies": {
         "docdash": "^2.0.2"
+    },
+    "dependencies": {
+        "jsdoc": "^4.0.3"
     }
 }
