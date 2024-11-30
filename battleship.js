@@ -1,5 +1,11 @@
 /**
- * The Battleship game class.
+ * @file Object Oriented version of a simple Battleship game.
+ * @author Carlos Limão <carlos.limao@ipluso.pt>
+ * @license MIT
+ */
+
+/**
+ * The game class.
  */
 class Battleship {
 	// Game constants
@@ -17,17 +23,20 @@ class Battleship {
 	#ships = [];
 	#board;
 
+	/**
+	 * Create a new game.
+	 * @param {boolean} start_game - true if game should be started after creation; false otherwise.
+	 */
 	constructor(start_game = true) {
 		if (start_game) {
 			this.#board = new Board(Battleship.MAX_ROWS, Battleship.MAX_COLS);
-			//this.#board.clear();
 			this.#board.draw();
 
 			// Initialize the game.
 			this.#winCount = this.initGame();
 
 			// Define an event listener to handle shots on the game board cells.
-			var thisObject = this; // "this" will not be available when fire is called, so keep it's value.
+			let thisObject = this; // "this" will not be available when fire is called, so keep it's value.
 			document.getElementById("gameboard").addEventListener("click", function (e) {thisObject.fire(e)}, false);
 		}
 	}
@@ -35,7 +44,6 @@ class Battleship {
 
 	/**
 	 * Place all the ships on the gaming board.
-	 *
 	 * @return Number of cells occupied by all ships.
 	 */
 	initGame() {
@@ -67,17 +75,16 @@ class Battleship {
 	/**
 	 * Randomly places an aircraft carrier in the game board.
 	 * This a T-shaped ship, occupying 5 cells.
-	 *
 	 * @param must_fit - If the ship should fit in the game board.
 	 * @return {Ship} - The created ship.
 	 */
 	createCarrier(must_fit = true) {
-        var fits = true;
-		var carrier = new Ship(5);
-		var location = [];
-		var non_overlapping_area = [];
-        var i;
-		var firstRow, firstCol;
+        let fits = true;
+		let carrier = new Ship(5);
+		let location = [];
+		let non_overlapping_area = [];
+        let i;
+		let firstRow, firstCol;
 
 		do {
 			location = [];
@@ -95,10 +102,6 @@ class Battleship {
 					location.push((firstRow+1).toString() + (firstCol+1).toString());
 					location.push((firstRow+2).toString() + (firstCol+1).toString());
 
-					if (must_fit) {
-						non_overlapping_area = this.getShipNonOverlappingLocations(location);
-					}
-
 					break;
 
 				case 1:		// ┤
@@ -111,10 +114,6 @@ class Battleship {
 					location.push((firstRow+2).toString() + firstCol.toString());
 					location.push((firstRow+1).toString() + (firstCol-1).toString());
 					location.push((firstRow+1).toString() + (firstCol-2).toString());
-
-					if (must_fit) {
-						non_overlapping_area = this.getShipNonOverlappingLocations(location);
-					}
 
 					break;
 
@@ -129,10 +128,6 @@ class Battleship {
 					location.push((firstRow-1).toString() + (firstCol-1).toString());
 					location.push((firstRow-2).toString() + (firstCol-1).toString());
 
-					if (must_fit) {
-						non_overlapping_area = this.getShipNonOverlappingLocations(location);
-					}
-
 					break;
 
 				case 3:		// ├
@@ -146,38 +141,38 @@ class Battleship {
 					location.push((firstRow-1).toString() + (firstCol+1).toString());
 					location.push((firstRow-1).toString() + (firstCol+2).toString());
 
-					if (must_fit) {
-						non_overlapping_area = this.getShipNonOverlappingLocations(location);
-					}
-
 					break;
 			}
-			for (i = 0;  i < this.#ships.length; i++) {
-				if (this.#ships[i].is_overlapped(non_overlapping_area)) {
-					fits = false;
-					break;
+
+			if (must_fit) {
+				non_overlapping_area = this.getShipNonOverlappingLocations(location);
+
+				for (i = 0;  i < this.#ships.length; i++) {
+					if (this.#ships[i].is_overlapped(non_overlapping_area)) {
+						fits = false;
+						break;
+					}
 				}
 			}
-
 		} while (!fits);
+
 		carrier.location = location;
 		return carrier;
 	}
 
 	/**
 	 * Randomly places a "linear" ship in the game board.
-	 *
 	 * @param size - Number of cells of the ship.
 	 * @param must_fit - If the ship should fit in the game board.
 	 * @return {Ship} - The created ship.
 	 */
 	createLinearShip(size, must_fit = true) {
-		var fits = true;
-		var firstRow, firstCol;
-		var i;
-		var location = [];
-		var non_overlapping_area = [];
-		var ship = new Ship(size);
+		let fits = true;
+		let firstRow, firstCol;
+		let i;
+		let location = [];
+		let non_overlapping_area = [];
+		let ship = new Ship(size);
 
 		do {
 			location = [];
@@ -193,10 +188,6 @@ class Battleship {
 						location.push(firstRow.toString() + (firstCol + i).toString());
 					}
 
-					if (must_fit) {
-						non_overlapping_area = this.getShipNonOverlappingLocations(location);
-					}
-
 					break;
 
 				case 1:		// N-S
@@ -208,19 +199,21 @@ class Battleship {
 						location.push((firstRow + i).toString() + firstCol.toString());
 					}
 
-					if (must_fit) {
-						non_overlapping_area = this.getShipNonOverlappingLocations(location);
-					}
-
 					break;
 			}
-			for (i = 0;  i < this.#ships.length; i++) {
-				if (this.#ships[i].is_overlapped(non_overlapping_area)) {
-					fits = false;
-					break;
+
+			if (must_fit) {
+				non_overlapping_area = this.getShipNonOverlappingLocations(location);
+
+				for (i = 0;  i < this.#ships.length; i++) {
+					if (this.#ships[i].is_overlapped(non_overlapping_area)) {
+						fits = false;
+						break;
+					}
 				}
 			}
 		} while (!fits);
+
 		ship.location = location;
 		return ship;
 	}
@@ -228,7 +221,6 @@ class Battleship {
 	/**
 	 * Returns the ship locations, including non-overlapping locations around the ship.
 	 * This is used to avoid ships in adjacent cells.
-	 *
 	 * @param shipLocations - Locations array with strings of row/col coordinates. Ex.: "75" for row 7, col 5.
 	 * @return {string[]} - The ship locations, including non-overlapping cells.
 	 */
@@ -253,7 +245,6 @@ class Battleship {
 
 	/**
 	 * Handles a shot in the cell with coordinates (row,col).
-	 *
 	 * @param row - Cell row where the shot was made.
 	 * @param col - Cell col where the shot was made.
 	 */
@@ -262,10 +253,10 @@ class Battleship {
 
 		this.#shotCount++;
 
-		var shot_location = [row.toString() + col.toString()];
-		var shot_status = Battleship.SHOT_MISS;
-		var i;
-		var first_hit;
+		let shot_location = [row.toString() + col.toString()];
+		let shot_status = Battleship.SHOT_MISS;
+		let i;
+		let first_hit;
 
 		for (i = 0; i < this.#ships.length; i++) {
 			if (this.#ships[i].is_overlapped(shot_location)) {
@@ -280,14 +271,13 @@ class Battleship {
 		if (first_hit) {
 			if (this.#hitCount == this.#winCount) {
 				let that = this;
-				setTimeout(function() { that.#board.message("Todos os navios foram afundados! Parabéns, ganhaste!\n\nPrecisaste de " + that.#shotCount + " torpedos."); }, 100);
+				setTimeout(function() { that.#board.message("Todos os navios foram afundados! Parabéns, ganhaste!\n\nUsaste " + that.#shotCount + " torpedos."); }, 100);
 			}
 		}
 	}
 
 	/**
 	 * Handle clicks on the game board.
-	 *
 	 * @param e Event.
 	 * @returns Nothing.
 	 */
@@ -295,8 +285,8 @@ class Battleship {
 		// if item clicked (e.target) is not the parent element on which the event listener was set (e.currentTarget).
 		if (e.target !== e.currentTarget) {
 			// Get row and column indexes from the id of the HTML element.
-			var row = e.target.id.substring(1, 2);
-			var col = e.target.id.substring(2, 3);
+			let row = e.target.id.substring(1, 2);
+			let col = e.target.id.substring(2, 3);
 			//alert("Click on row " + row + ", col " + col);
 
 			if (row && col) {
@@ -308,7 +298,6 @@ class Battleship {
 
 	/**
 	 * Get a random int in the interval [min, max[
-	 *
 	 * @param min The minimum value (inclusive)
 	 * @param max The maximum value (exclusive)
 	 * @returns {number} A random integer value in the specified interval.
@@ -400,6 +389,11 @@ class Board {
 	#numRows;
 	#numCols;
 
+	/**
+	 * Create board with the specified number of rows and columns.
+	 * @param {number} numRows - Number of rows in board.
+	 * @param {number} numCols - Number of columns in board.
+	 */
 	constructor(numRows, numCols) {
 		this.#numRows = numRows;
 		this.#numCols = numCols;
@@ -410,7 +404,7 @@ class Board {
 	 * Clear board of all existing ships.
 	 */
 	clear() {
-		var i, j;
+		let i, j;
 		for (i = 0; i < this.#numRows; i++) {
 			for (j = 0; j < this.#numCols; j++) {
 				this.#gameBoard[i][j] = Board.CELL_EMPTY;
@@ -422,13 +416,13 @@ class Board {
 	 * Draw the initial, empty, board.
 	 */
 	draw() {
-		var row, col;
+		let row, col;
 
 		for (row = 0; row <= this.#numRows; row++) {
 			for (col = 0; col <= this.#numCols; col++) {
 
 				// create a div HTML element for each grid cell.
-				var cell = document.createElement("div");
+				let cell = document.createElement("div");
 				document.getElementById("gameboard").appendChild(cell);
 
 				if (row != 0 && col != 0) {
@@ -498,7 +492,7 @@ class Board {
 
 	/**
 	 * Write message in message area.
-	 * @param {String} msg - The message to write. 
+	 * @param {String} msg - The message to write.
 	 */
 	message(msg) {
 		let msg_el;
