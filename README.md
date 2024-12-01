@@ -1,8 +1,8 @@
 # Battleship Game
 
-This is a simple Battleship game where the computer draws a board where 11 ships are hidden.
+This is a simple Battleship game where the computer draws a board whith 11 hidden ships.
 
-The board is 10x10 and internally uses a coordinate system that uses 2-digit strings - "xy" (0-9 each digit).
+The board is 10x10 and uses a coordinate system with 2-digit strings - "xy" (0-9 each digit).
 
 The ships used in the game can have size 1, 2, 3, 4 or 5.
 
