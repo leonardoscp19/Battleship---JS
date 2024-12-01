@@ -35,12 +35,11 @@ class Battleship {
 			// Initialize the game.
 			this.#winCount = this.initGame();
 
-			// Define an event listener to handle shots on the game board cells.
+				// Define an event listener to handle shots on the game board cells.
 			let thisObject = this; // "this" will not be available when fire is called, so keep it's value.
 			document.getElementById("gameboard").addEventListener("click", function (e) {thisObject.fire(e)}, false);
 		}
 	}
-
 
 	/**
 	 * Place all the ships on the gaming board.
@@ -60,7 +59,7 @@ class Battleship {
 		}
 
 		// Return number of hits to win (number of cells containing ships)
-		return this.#ships.reduce((currentCount, ship) => currentCount + ship.size, 0);
+		return this.getNumberOfOccupiedCells();
 	}
 
 	/**
@@ -68,8 +67,29 @@ class Battleship {
 	 * @param ship - The ship to add.
 	 */
 	addShipToGame(ship) {
-		if (ship.size < 1 || ship.size > 5 || ship.location.length != ship.size) throw Error("Invalid ship size");
+		if (ship.size < 1 || ship.size > 5 || ship.location.length != ship.size) throw new Error("Invalid ship size");
 		this.#ships.push(ship);
+	}
+
+	/**
+	 * @returns Get number of ships in game.
+	 */
+	getNumberOfShips() {
+		return this.#ships.length;
+	}
+
+	/**
+	 * Clear all ships in game.
+	 */
+	clearShips() {
+		this.#ships = [];
+	}
+
+	/**
+	 * @returns Get number of occupied cells.
+	 */
+	getNumberOfOccupiedCells() {
+		return this.#ships.reduce((currentCount, ship) => currentCount + ship.size, 0);
 	}
 
 	/**
