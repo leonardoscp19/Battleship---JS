@@ -16,12 +16,21 @@
             }
         });
 
-        QUnit.test('create Battleship game', function(assert) {
+        QUnit.test('Create empty Battleship game', function(assert) {
             assert.equal(Battleship.MAX_ROWS, 10);
+            assert.equal(Battleship.MAX_COLS, 10);
         });
 
-        QUnit.test('create Carrier ship', function(assert) {
-            var ship = this.game.createCarrier();
+        QUnit.test('Create Battleship game with ships', function(assert) {
+            assert.equal(this.game.initGame(), 25);
+            assert.equal(this.game.getNumberOfOccupiedCells(), 25);
+            assert.equal(this.game.getNumberOfShips(), 11);
+        });
+
+
+        QUnit.test('Create Carrier ship', function(assert) {
+            let i;
+            let ship = this.game.createCarrier();
             assert.equal(ship.size, 5);
             assert.equal(ship.location.length, 5);
 
@@ -35,8 +44,9 @@
             }
         });
 
-        QUnit.test('create 1 cannon ship', function(assert) {
-            var ship = this.game.createLinearShip(1);
+        QUnit.test('Create 1 cannon ship', function(assert) {
+            let i;
+            let ship = this.game.createLinearShip(1);
             assert.equal(ship.size, 1);
             assert.equal(ship.location.length, 1);
             for (i = 0; i < ship.location.length; i++) {
@@ -48,8 +58,9 @@
             }
         });
 
-        QUnit.test('create 2 cannon ship', function(assert) {
-            var ship = this.game.createLinearShip(2);
+        QUnit.test('Create 2 cannon ship', function(assert) {
+            let i;
+            let ship = this.game.createLinearShip(2);
             assert.equal(ship.size, 2);
             assert.equal(ship.location.length, 2);
             for (i = 0; i < ship.location.length; i++) {
@@ -61,8 +72,9 @@
             }
         });
 
-        QUnit.test('create 3 cannon ship', function(assert) {
-            var ship = this.game.createLinearShip(3);
+        QUnit.test('Create 3 cannon ship', function(assert) {
+            let i;
+            let ship = this.game.createLinearShip(3);
             assert.equal(ship.size, 3);
             assert.equal(ship.location.length, 3);
             for (i = 0; i < ship.location.length; i++) {
@@ -74,8 +86,9 @@
             }
         });
 
-        QUnit.test('create 4 cannon ship', function(assert) {
-            var ship = this.game.createLinearShip(4);
+        QUnit.test('Create 4 cannon ship', function(assert) {
+            let i;
+            let ship = this.game.createLinearShip(4);
             assert.equal(ship.size, 4);
             assert.equal(ship.location.length, 4);
             for (i = 0; i < ship.location.length; i++) {
@@ -87,9 +100,9 @@
             }
         });
 
-        QUnit.test('test overlapped', function(assert) {
-            var ship = new Ship(3);
-            var location = ["11", "12", "13"];
+        QUnit.test('Overlapped ships are correctly detected', function(assert) {
+            let ship = new Ship(3);
+            let location = ["11", "12", "13"];
             ship.location = location;
             assert.ok(ship.is_overlapped(["11"]));
             assert.ok(ship.is_overlapped(["12"]));
@@ -101,32 +114,59 @@
             assert.notOk(ship.is_overlapped([])); // Should return false if given an empty location array.
         });
 
-        QUnit.test('Ships in game do not overlap', function(assert) {
-            var i;
-            var ship1 = this.game.createCarrier();
+        QUnit.test('Ships in a game do not overlap', function(assert) {
+            let i;
+            let ship1 = this.game.createCarrier();
+
             assert.equal(ship1.size, 5);
             assert.equal(ship1.location.length, 5);
-            this.game.addShipToGame(ship1);
 
             for (i = 0; i < 100; i++) {
-                var ship2;
+                this.game.addShipToGame(ship1);
+                let ship2;
                 if (i % 5 == 0) {
                     ship2 = this.game.createCarrier();
                 }
                 else {
                     ship2 = this.game.createLinearShip(i % 5);
                 }
+                this.game.addShipToGame(ship2);
                 assert.equal(ship2.size, i % 5 == 0 ? 5 : i % 5);
                 assert.equal(ship2.location.length, i % 5 == 0 ? 5 : i % 5);
                 assert.notOk(ship1.is_overlapped(ship2.location));
+
+                assert.equal(this.game.getNumberOfOccupiedCells(), 5 + (i % 5 == 0 ? 5 : i % 5));
+                assert.equal(this.game.getNumberOfShips(), 2);
+
+                this.game.clearShips();
+
+                assert.equal(this.game.getNumberOfOccupiedCells(), 0);
+                assert.equal(this.game.getNumberOfShips(), 0);
             }
         });
 
-        QUnit.test('Ships don\'t overlapping with themselves or with free space', function(assert) {
-            var i, j;
-            var ship = this.game.createCarrier();
-            var allLocations = [];
-            var nonShipLocations = [];
+        QUnit.test('Invalid ships throw exception', function(assert) {
+            let i;
+            let that = this;
+
+            let ship1 = this.game.createLinearShip(6);
+            assert.throws(function() { that.game.addShipToGame(ship1); }, Error );
+
+            let ship2 = this.game.createLinearShip(4);
+            ship2.location = ["12", "32"];
+            assert.throws(function() { that.game.addShipToGame(ship2); }, Error );
+
+            ship2.location = [];
+            assert.throws(function() { that.game.addShipToGame(ship2); }, Error );
+
+            assert.equal(this.game.getNumberOfShips(), 0);
+        });
+
+        QUnit.test('Ships don\'t overlap with themselves or with free space', function(assert) {
+            let i, j;
+            let allLocations = [];
+            let nonShipLocations = [];
+            let ship = this.game.createCarrier();
 
             for (i = 0; i < Battleship.MAX_ROWS; i++) {
                 for (j = 0; j < Battleship.MAX_COLS; j++) {
@@ -136,35 +176,57 @@
             nonShipLocations = allLocations.filter( el => !ship.location.includes(el) );
 
             // Ship should overlap with itself
+            assert.ok(ship.is_overlapped(ship.location));
             for (i = 0; i < ship.location.length; i++) {
                 assert.ok(ship.is_overlapped(ship.location[i]));
             }
 
             // Ship should NOT overlap with anything else
+            assert.notOk(ship.is_overlapped(nonShipLocations));
             for (i = 0; i < nonShipLocations.length; i++) {
                 assert.notOk(ship.is_overlapped(nonShipLocations[i]));
             }
         });
 
-        QUnit.test('Ships have an extended non overlapping area', function(assert) {
-            var i, j;
-            var ship = this.game.createCarrier();
-            var allLocations = [];
-            var nonShipLocations = [];
-            var extendedShipLocations = [];
-            var marginShipLocations = [];
+        QUnit.test('Ships have an extended non-overlapping area', function(assert) {
+            let size = 0;
+            let allLocations = [];
+            let nonShipLocations = [];
+            let extendedShipLocations = [];
+            let marginShipLocations = [];
+            let ship = this.game.createCarrier();
 
             extendedShipLocations = this.game.getShipNonOverlappingLocations(ship.location);
             marginShipLocations = extendedShipLocations.filter( el => !ship.location.includes(el) );
+
+            // Extended carrier locations should have the right size
+            assert.ok(extendedShipLocations.length, 21);
+            assert.ok(marginShipLocations.length, 16);
 
             // Ship should overlap with extended locations
             assert.ok(ship.is_overlapped(extendedShipLocations));
 
             // Ship should NOT overlap with "margin" locations
             assert.notOk(ship.is_overlapped(marginShipLocations));
+
+            for (size = 1; size <= 4; size++) {
+                ship = this.game.createLinearShip(size);
+
+                extendedShipLocations = this.game.getShipNonOverlappingLocations(ship.location);
+                marginShipLocations = extendedShipLocations.filter( el => !ship.location.includes(el) );
+
+                // Extended ship locations should have the right size
+                assert.ok(extendedShipLocations.length, 2 * size + 6);
+                assert.ok(marginShipLocations.length, (2 * size + 6) - size);
+
+                // Ship should overlap with extended locations
+                assert.ok(ship.is_overlapped(extendedShipLocations));
+
+                // Ship should NOT overlap with "margin" locations
+                assert.notOk(ship.is_overlapped(marginShipLocations));
+
+            }
         });
-
-
 
     </script>
 </body
