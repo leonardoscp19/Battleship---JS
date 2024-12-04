@@ -283,6 +283,7 @@ class Battleship {
 				// Hit!
 				shot_status = (this.#ships[i].size << 4) | Battleship.SHOT_HIT;
 				this.#hitCount++;
+				this.setHitCounter();
 				break;
 			}
 		}
@@ -327,6 +328,10 @@ class Battleship {
 		const minCeiled = Math.ceil(min);
 		const maxFloored = Math.floor(max);
 		return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+	}
+
+	setHitCounter() {
+		document.getElementById("HitCounter").innerHTML = "Hit counter: " + this.#hitCount;
 	}
 
 	setScoore() {
