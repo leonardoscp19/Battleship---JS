@@ -35,9 +35,9 @@ class Battleship {
 			// Initialize the game.
 			this.#winCount = this.initGame();
 
-				// Define an event listener to handle shots on the game board cells.
+			// Define an event listener to handle shots on the game board cells.
 			let thisObject = this; // "this" will not be available when fire is called, so keep it's value.
-			document.getElementById("gameboard").addEventListener("click", function (e) {thisObject.fire(e)}, false);
+			document.getElementById("gameboard").addEventListener("click", function(e) { thisObject.fire(e) }, false);
 		}
 	}
 
@@ -48,7 +48,7 @@ class Battleship {
 	initGame() {
 		let s, i;
 
-		for (i = 0;  i < this.#shipLengths.length; i++) {
+		for (i = 0; i < this.#shipLengths.length; i++) {
 			if (this.#shipLengths[i] == 5) {
 				s = this.createCarrier();
 			}
@@ -99,11 +99,11 @@ class Battleship {
 	 * @return {Ship} - The created ship.
 	 */
 	createCarrier(must_fit = true) {
-        let fits = true;
+		let fits = true;
 		let carrier = new Ship(5);
 		let location = [];
 		let non_overlapping_area = [];
-        let i;
+		let i;
 		let firstRow, firstCol;
 
 		do {
@@ -112,28 +112,28 @@ class Battleship {
 			fits = true;
 			switch (this.getRandomInt(0, 4)) { // "orientation"
 				case 0: 	// T
-					firstRow = this.getRandomInt(0, Battleship.MAX_ROWS-2);
-					firstCol = this.getRandomInt(0, Battleship.MAX_COLS-2);
+					firstRow = this.getRandomInt(0, Battleship.MAX_ROWS - 2);
+					firstCol = this.getRandomInt(0, Battleship.MAX_COLS - 2);
 
 					// Define ship locations
 					location.push(firstRow.toString() + firstCol.toString());
-					location.push(firstRow.toString() + (firstCol+1).toString());
-					location.push(firstRow.toString() + (firstCol+2).toString());
-					location.push((firstRow+1).toString() + (firstCol+1).toString());
-					location.push((firstRow+2).toString() + (firstCol+1).toString());
+					location.push(firstRow.toString() + (firstCol + 1).toString());
+					location.push(firstRow.toString() + (firstCol + 2).toString());
+					location.push((firstRow + 1).toString() + (firstCol + 1).toString());
+					location.push((firstRow + 2).toString() + (firstCol + 1).toString());
 
 					break;
 
 				case 1:		// ┤
-					firstRow = this.getRandomInt(0, Battleship.MAX_ROWS-2);
+					firstRow = this.getRandomInt(0, Battleship.MAX_ROWS - 2);
 					firstCol = this.getRandomInt(2, Battleship.MAX_COLS);
 
 					// Define ship locations
 					location.push(firstRow.toString() + firstCol.toString());
-					location.push((firstRow+1).toString() + firstCol.toString());
-					location.push((firstRow+2).toString() + firstCol.toString());
-					location.push((firstRow+1).toString() + (firstCol-1).toString());
-					location.push((firstRow+1).toString() + (firstCol-2).toString());
+					location.push((firstRow + 1).toString() + firstCol.toString());
+					location.push((firstRow + 2).toString() + firstCol.toString());
+					location.push((firstRow + 1).toString() + (firstCol - 1).toString());
+					location.push((firstRow + 1).toString() + (firstCol - 2).toString());
 
 					break;
 
@@ -143,23 +143,23 @@ class Battleship {
 
 					// Define ship locations
 					location.push(firstRow.toString() + firstCol.toString());
-					location.push(firstRow.toString() + (firstCol-1).toString());
-					location.push(firstRow.toString() + (firstCol-2).toString());
-					location.push((firstRow-1).toString() + (firstCol-1).toString());
-					location.push((firstRow-2).toString() + (firstCol-1).toString());
+					location.push(firstRow.toString() + (firstCol - 1).toString());
+					location.push(firstRow.toString() + (firstCol - 2).toString());
+					location.push((firstRow - 1).toString() + (firstCol - 1).toString());
+					location.push((firstRow - 2).toString() + (firstCol - 1).toString());
 
 					break;
 
 				case 3:		// ├
 					firstRow = this.getRandomInt(2, Battleship.MAX_ROWS);
-					firstCol = this.getRandomInt(0, Battleship.MAX_COLS-2);
+					firstCol = this.getRandomInt(0, Battleship.MAX_COLS - 2);
 
 					// Define ship locations
 					location.push(firstRow.toString() + firstCol.toString());
-					location.push((firstRow-1).toString() + firstCol.toString());
-					location.push((firstRow-2).toString() + firstCol.toString());
-					location.push((firstRow-1).toString() + (firstCol+1).toString());
-					location.push((firstRow-1).toString() + (firstCol+2).toString());
+					location.push((firstRow - 1).toString() + firstCol.toString());
+					location.push((firstRow - 2).toString() + firstCol.toString());
+					location.push((firstRow - 1).toString() + (firstCol + 1).toString());
+					location.push((firstRow - 1).toString() + (firstCol + 2).toString());
 
 					break;
 			}
@@ -167,7 +167,7 @@ class Battleship {
 			if (must_fit) {
 				non_overlapping_area = this.getShipNonOverlappingLocations(location);
 
-				for (i = 0;  i < this.#ships.length; i++) {
+				for (i = 0; i < this.#ships.length; i++) {
 					if (this.#ships[i].is_overlapped(non_overlapping_area)) {
 						fits = false;
 						break;
@@ -225,7 +225,7 @@ class Battleship {
 			if (must_fit) {
 				non_overlapping_area = this.getShipNonOverlappingLocations(location);
 
-				for (i = 0;  i < this.#ships.length; i++) {
+				for (i = 0; i < this.#ships.length; i++) {
 					if (this.#ships[i].is_overlapped(non_overlapping_area)) {
 						fits = false;
 						break;
@@ -251,8 +251,8 @@ class Battleship {
 		for (l = 0; l < shipLocations.length; l++) {
 			row = parseInt(shipLocations[l].substring(0, 1));
 			col = parseInt(shipLocations[l].substring(1, 2));
-			for (i = row-1; i <= row+1; i++) {
-				for (j = col-1; j <= col+1; j++) {
+			for (i = row - 1; i <= row + 1; i++) {
+				for (j = col - 1; j <= col + 1; j++) {
 					if (i >= 0 && i < Battleship.MAX_ROWS && j >= 0 && j < Battleship.MAX_COLS) {
 						non_overlapping_area.add(i.toString() + j.toString());
 					}
@@ -313,6 +313,7 @@ class Battleship {
 				this.handleShot(row, col);
 			}
 		}
+		this.setScoore();
 		e.stopPropagation();
 	}
 
@@ -326,6 +327,10 @@ class Battleship {
 		const minCeiled = Math.ceil(min);
 		const maxFloored = Math.floor(max);
 		return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+	}
+
+	setScoore() {
+		document.getElementById("ShotsFired").innerHTML = "Shots fired: " + this.#shotCount;
 	}
 }
 
@@ -447,13 +452,13 @@ class Board {
 
 				if (row != 0 && col != 0) {
 					// Each cell is a div element with an ID with format: "c<row><col>"
-					cell.id = 'c' + (row-1) + (col-1);
+					cell.id = 'c' + (row - 1) + (col - 1);
 				}
 				else {
 					cell.style.backgroundColor = Board.COORD_COLOR;
 					cell.style.color = "white";
 					if (row == 0 && col != 0) {
-						cell.textContent = String.fromCharCode("A".charCodeAt(0) + col-1);
+						cell.textContent = String.fromCharCode("A".charCodeAt(0) + col - 1);
 					}
 					else if (col == 0 && row != 0) {
 						cell.textContent = row;
@@ -483,7 +488,7 @@ class Board {
 		this.message("");
 		if (!shot_hit) {
 			if (this.#gameBoard[row][col] == Board.CELL_EMPTY) {
-				document.getElementById('c'+row.toString() + col.toString()).style.background = Board.MISS_COLOR;
+				document.getElementById('c' + row.toString() + col.toString()).style.background = Board.MISS_COLOR;
 				this.#gameBoard[row][col] = (this.#gameBoard[row][col] & 0xF0) | Board.CELL_MISSED_SHOT;
 				return true;
 			}
@@ -495,7 +500,7 @@ class Board {
 		else {
 			if (this.#gameBoard[row][col] == Board.CELL_EMPTY) {
 				// A hit on a ship changes the color to red and cell's value to 2 (hit)
-				document.getElementById('c'+row.toString() + col.toString()).style.background = Board.HIT_COLOR;
+				document.getElementById('c' + row.toString() + col.toString()).style.background = Board.HIT_COLOR;
 				this.#gameBoard[row][col] = (this.#gameBoard[row][col] & 0xF0) | Board.CELL_SHIP_PART_HIT;
 
 				// Show what type of ship was hit.
