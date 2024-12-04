@@ -488,7 +488,7 @@ class Board {
 				return true;
 			}
 			else {
-				this.message("Para de desperdiçar torpedos! Já disparaste nesta posição.");
+				this.message("Impossivel, clicar noutro lugar");
 				return false;
 			}
 		}
