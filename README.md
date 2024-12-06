@@ -40,6 +40,8 @@ The other are linear ships with 2 possible orientations (N-S or E-W).
 
 - <p><a href="#limitations">Limitations</a>
 
+- <p><a href="#documentation">Documentation</a>
+
 - <p><a href="#diagrams">Diagrams</a>
 
   - <p><a href="#diagrams-flow"> Flow Diagram</a>
@@ -91,6 +93,15 @@ The app is awesome!
 <div style="text-align:right"><a href="#top">Back to top</a></div>
 
 ---
+
+<div id="documentation"></div>
+
+## Documentation
+
+Documention may be automatically generated using JSDoc.
+
+* To install JSDoc: npm install -g jsdoc
+* To build documentation: jsdoc  .
 
 <div id="diagrams"></div>
 

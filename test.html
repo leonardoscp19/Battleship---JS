@@ -8,6 +8,11 @@
     <script src="https://code.jquery.com/qunit/qunit-2.20.1.js"></script>
     <script src="battleship.js"></script>
 
+    <div id="gameboard" style="display: none">
+	</div>
+	<div id="game-messages" style="display: none">
+	</div>
+
     <script>
 
         QUnit.module('Battleship', {
@@ -200,8 +205,8 @@
             marginShipLocations = extendedShipLocations.filter( el => !ship.location.includes(el) );
 
             // Extended carrier locations should have the right size
-            assert.ok(extendedShipLocations.length, 21);
-            assert.ok(marginShipLocations.length, 16);
+            assert.equal(extendedShipLocations.length, 21);
+            assert.equal(marginShipLocations.length, 16);
 
             // Ship should overlap with extended locations
             assert.ok(ship.is_overlapped(extendedShipLocations));
@@ -216,8 +221,7 @@
                 marginShipLocations = extendedShipLocations.filter( el => !ship.location.includes(el) );
 
                 // Extended ship locations should have the right size
-                assert.ok(extendedShipLocations.length, 2 * size + 6);
-                assert.ok(marginShipLocations.length, (2 * size + 6) - size);
+                assert.equal(marginShipLocations.length, extendedShipLocations.length - size);
 
                 // Ship should overlap with extended locations
                 assert.ok(ship.is_overlapped(extendedShipLocations));
@@ -226,6 +230,13 @@
                 assert.notOk(ship.is_overlapped(marginShipLocations));
 
             }
+        });
+
+        QUnit.test('Test UI', function(assert) {
+            this.game =  new Battleship(true);
+
+            assert.equal(this.game.getNumberOfShips(), 11);
+            assert.equal(this.game.getNumberOfOccupiedCells(), 25);
         });
 
     </script>
