@@ -34,6 +34,8 @@ class Battleship {
 
 			// Initialize the game.
 			this.#winCount = this.initGame();
+			this.showHitCount();
+			this.showShotCount();
 
 			// Define an event listener to handle shots on the game board cells.
 			let thisObject = this; // "this" will not be available when fire is called, so keep it's value.
@@ -280,19 +282,20 @@ class Battleship {
 
 		for (i = 0; i < this.#ships.length; i++) {
 			if (this.#ships[i].is_overlapped(shot_location)) {
-				// Hit!
+				// Hit! Possibly repeated, so check below before updating hitCount.
 				shot_status = (this.#ships[i].size << 4) | Battleship.SHOT_HIT;
-				this.#hitCount++;
-				this.setHitCounter();
 				break;
 			}
 		}
 
 		first_hit = this.#board.update(row, col, (shot_status & 0x0F) == Battleship.SHOT_MISS ? false : true, shot_status >> 4);
 		if (first_hit) {
+			this.#hitCount++;
+			this.showHitCount();
+
 			if (this.#hitCount == this.#winCount) {
 				let that = this;
-				setTimeout(function() { that.#board.message("Todos os navios foram afundados! Parabéns, ganhaste!\n\nUsaste " + that.#shotCount + " torpedos."); }, 100);
+				setTimeout(function() { that.#board.message("Todos os navios foram afundados. Parabéns!"); }, 100);
 			}
 		}
 	}
@@ -314,7 +317,7 @@ class Battleship {
 				this.handleShot(row, col);
 			}
 		}
-		this.setScoore();
+		this.showShotCount();
 		e.stopPropagation();
 	}
 
@@ -330,12 +333,18 @@ class Battleship {
 		return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
 	}
 
-	setHitCounter() {
-		document.getElementById("HitCounter").innerHTML = "Hit counter: " + this.#hitCount;
+	/**
+	 * Show number of hits in ships.
+	 */
+	showHitCount() {
+		document.getElementById("hit-counter").innerHTML = this.#hitCount;
 	}
 
-	setScoore() {
-		document.getElementById("ShotsFired").innerHTML = "Shots fired: " + this.#shotCount;
+	/**
+	 * Show number of shots fired.
+	 */
+	showShotCount() {
+		document.getElementById("shots-fired").innerHTML = this.#shotCount;
 	}
 }
 
@@ -402,9 +411,10 @@ class Ship {
  */
 class Board {
 	// Cell colors
-	static MISS_COLOR = '#bbb';
-	static HIT_COLOR = 'red';
-	static COORD_COLOR = 'black';
+	static INITIAL_COLOR = '#bbbbbb'; // Neutral color
+	static MISS_COLOR = '#006994';    // This reveals WATER
+	static HIT_COLOR = 'red';         // This reveals a ship
+	static COORD_COLOR = 'black';     // Edge cells
 
 	// Cell size
 	static CELL_SIZE_PX = 50
@@ -427,19 +437,14 @@ class Board {
 	constructor(numRows, numCols) {
 		this.#numRows = numRows;
 		this.#numCols = numCols;
-		this.#gameBoard = Array(numRows).fill().map(() => Array(numCols).fill(Board.CELL_EMPTY));
+		this.clear();
 	}
 
 	/**
 	 * Clear board of all existing ships.
 	 */
 	clear() {
-		let i, j;
-		for (i = 0; i < this.#numRows; i++) {
-			for (j = 0; j < this.#numCols; j++) {
-				this.#gameBoard[i][j] = Board.CELL_EMPTY;
-			}
-		}
+		this.#gameBoard = Array(this.#numRows).fill().map(() => Array(this.#numCols).fill(Board.CELL_EMPTY));
 	}
 
 	/**
@@ -458,6 +463,7 @@ class Board {
 				if (row != 0 && col != 0) {
 					// Each cell is a div element with an ID with format: "c<row><col>"
 					cell.id = 'c' + (row - 1) + (col - 1);
+					cell.style.background = Board.INITIAL_COLOR;
 				}
 				else {
 					cell.style.backgroundColor = Board.COORD_COLOR;
@@ -495,10 +501,10 @@ class Board {
 			if (this.#gameBoard[row][col] == Board.CELL_EMPTY) {
 				document.getElementById('c' + row.toString() + col.toString()).style.background = Board.MISS_COLOR;
 				this.#gameBoard[row][col] = (this.#gameBoard[row][col] & 0xF0) | Board.CELL_MISSED_SHOT;
-				return true;
+				return false;
 			}
 			else {
-				this.message("Impossivel, clicar noutro lugar");
+				this.message("Para de desperdiçar torpedos! Já disparaste nesta posição.");
 				return false;
 			}
 		}
