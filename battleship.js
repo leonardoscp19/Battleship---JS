@@ -58,6 +58,7 @@ class Battleship {
 				s = this.createLinearShip(this.#shipLengths[i]);
 			}
 			this.addShipToGame(s);
+			
 		}
 
 		// Return number of hits to win (number of cells containing ships)
